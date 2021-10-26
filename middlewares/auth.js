@@ -4,21 +4,23 @@ const UnauthorizedError = require('../errors/unauthorized-err');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
+const { devJwt, wrongLogOrPass, authErr } = require('../constants/constants');
+
 const tokenVerify = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new UnauthorizedError('Ошибка авторизации!');
+    throw new UnauthorizedError(authErr);
   }
   const token = authorization.replace('Bearer ', '');
 
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : '88005553535');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : devJwt);
   } catch (err) {
     if (err) {
-      throw new UnauthorizedError('Неправильные почта или пароль');
+      throw new UnauthorizedError(wrongLogOrPass);
     }
 
     next(err);

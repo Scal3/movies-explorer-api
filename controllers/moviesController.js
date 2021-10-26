@@ -1,7 +1,14 @@
 const Movie = require('../models/movie');
 
-const codeOk = 200;
-const codeCreated = 201;
+const {
+  codeOk,
+  codeCreated,
+  moviesNotFound,
+  movieNotFound,
+  wrongData,
+  impossibleToDelete,
+  succseccDelit,
+} = require('../constants/constants');
 const BadReqError = require('../errors/bad-req-err');
 const NotFoundError = require('../errors/not-found-err');
 const ForbiddenError = require('../errors/forbidden-err');
@@ -11,7 +18,7 @@ const getMovies = (req, res, next) => {
   Movie.find({})
     .then((movies) => {
       if (!movies || movies.length === 0) {
-        throw new NotFoundError('Фильмы не найдены!');
+        throw new NotFoundError(moviesNotFound);
       } else {
         res.status(codeOk).send({ movies });
       }
@@ -24,7 +31,8 @@ const createFilm = (req, res, next) => {
   const {
     country, director, duration, year,
     description, image, trailer, nameRU,
-    nameEN, thumbnail, movieId } = req.body;
+    nameEN, thumbnail, movieId,
+  } = req.body;
   const owner = req.user._id;
 
   Movie.create({
@@ -39,10 +47,11 @@ const createFilm = (req, res, next) => {
     nameEN,
     owner,
     thumbnail,
-    movieId })
+    movieId,
+  })
     .then((movie) => {
       if (!movie) {
-        throw new BadReqError('Неверные данные!');
+        throw new BadReqError(wrongData);
       }
       res.status(codeCreated).send({ movie });
     })
@@ -55,19 +64,19 @@ const deleteFilm = (req, res, next) => {
   const owner = req.user._id;
   Movie.findById(id)
     .then((movie) => {
-      const movieOwner = JSON.stringify(movie.owner).replace(/\"/g, '');
       if (!movie) {
-        throw new NotFoundError('Фильм не найден!');
+        throw new NotFoundError(movieNotFound);
       }
+
+      const movieOwner = String(movie.owner);
+
       if (movieOwner !== owner) {
-        throw new ForbiddenError('Вы не можете удалить этот фильм!');
+        throw new ForbiddenError(impossibleToDelete);
       }
-      Movie.findByIdAndRemove(id)
-        .then((movieForDel) => {
-          if (!movieForDel) {
-            throw new NotFoundError('Фильм не найден!');
-          }
-          res.status(codeOk).send({ message: 'Фильм успешно удалён!' });
+
+      movie.remove()
+        .then(() => {
+          res.status(codeOk).send({ message: succseccDelit });
         })
         .catch(next);
     })

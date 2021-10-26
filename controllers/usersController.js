@@ -2,8 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const codeOk = 200;
-const codeCreated = 201;
+const {
+  codeOk,
+  codeCreated,
+  userNotFound,
+  wrongLogOrPass,
+  succseccRegistration,
+  wrongData,
+  devJwt,
+} = require('../constants/constants');
 const NotFoundError = require('../errors/not-found-err');
 const BadReqError = require('../errors/bad-req-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
@@ -16,7 +23,7 @@ const getUserInfo = (req, res, next) => {
   User.findById(owner)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден!');
+        throw new NotFoundError(userNotFound);
       } else {
         res.status(codeOk)
           .send({ email: user.email, name: user.name });
@@ -33,7 +40,7 @@ const updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(owner, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден!');
+        throw new NotFoundError(userNotFound);
       } else {
         res.status(codeOk).send({ data: user });
       }
@@ -49,10 +56,10 @@ const createUser = (req, res, next) => {
       User.create({ name, email, password: hash })
         .then((user) => {
           if (!user) {
-            throw new BadReqError('Неверные данные');
+            throw new BadReqError(wrongData);
           }
 
-          res.status(codeCreated).send({ message: 'Вы успешно зарегистрировались!' });
+          res.status(codeCreated).send({ message: succseccRegistration });
         })
 
         .catch(next);
@@ -67,16 +74,16 @@ const loginUser = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new UnauthorizedError('Неправильные почта или пароль');
+        throw new UnauthorizedError(wrongLogOrPass);
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new UnauthorizedError('Неправильные почта или пароль');
+            throw new UnauthorizedError(wrongLogOrPass);
           }
           const token = jwt.sign({ _id: user._id },
-            NODE_ENV === 'production' ? JWT_SECRET : '88005553535', { expiresIn: '7d' });
+            NODE_ENV === 'production' ? JWT_SECRET : devJwt, { expiresIn: '7d' });
           res.status(codeOk).send({ token });
         })
         .catch(next);
