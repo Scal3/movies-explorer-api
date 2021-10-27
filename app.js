@@ -43,7 +43,7 @@ app.use(regAndLogRouter);
 app.use(auth, indexRouter);
 
 // Ошибка, при обращении к несуществующему роуту
-app.use('*', (req, res, next) => {
+app.get('*', (req, res, next) => {
   res.status(codeNotFound).send({ message: pageNotFound });
   next();
 });

@@ -20,19 +20,19 @@ router.post('/',
       year: Joi.string().required(),
       description: Joi.string().required(),
       image: Joi.string().required().custom((value, helpers) => {
-        if (validator.isUrl(value)) {
+        if (validator.isURL(value)) {
           return value;
         }
         return helpers.message('Поле imege заполненно некоректно!');
       }),
       trailer: Joi.string().required().custom((value, helpers) => {
-        if (validator.isUrl(value)) {
+        if (validator.isURL(value)) {
           return value;
         }
         return helpers.message('Поле trailer заполненно некоректно!');
       }),
       thumbnail: Joi.string().required().custom((value, helpers) => {
-        if (validator.isUrl(value)) {
+        if (validator.isURL(value)) {
           return value;
         }
         return helpers.message('Поле thumbnail заполненно некоректно!');
