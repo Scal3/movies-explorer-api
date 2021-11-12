@@ -36,6 +36,12 @@ app.use(bodyParser.json());
 // Логер запросов
 app.use(requestLogger);
 
+// Простые cors запросы
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 // Роуты регистрации и логина
 app.use(regAndLogRouter);
 
