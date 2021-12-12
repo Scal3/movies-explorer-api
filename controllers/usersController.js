@@ -26,7 +26,7 @@ const getUserInfo = (req, res, next) => {
         throw new NotFoundError(userNotFound);
       } else {
         res.status(codeOk)
-          .send({ email: user.email, name: user.name });
+          .send({ email: user.email, name: user.name, id: owner });
       }
     })
     .catch(next);
